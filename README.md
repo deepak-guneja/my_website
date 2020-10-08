@@ -1,9 +1,1 @@
-# my_website
-
-*testing*
-
-**testing2**
-
-Hello world, how are you this beautiful morning?
-
-Once again!
+# My Website: https://deepak-my-website.netlify.app/
