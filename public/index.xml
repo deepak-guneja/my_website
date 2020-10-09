@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Deepak</title>
+    <title>Deepak Guneja website</title>
     <link>/</link>
-    <description>Recent content on Deepak</description>
+    <description>Recent content on Deepak Guneja website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 31 Oct 2017 22:42:51 -0500</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 09 Oct 2020 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>My biography</title>
+      <link>/blogs/blog6/</link>
+      <pubDate>Fri, 09 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blogs/blog6/</guid>
+      <description>BiographyMy name is Deepak Guneja, and I am reading Masters in Financial Analysis degree at the London Business School. I am a major in Computer Science with a minor in Finance from BITS-Pilani, India. I have been fortunate enough to receive Merit Scholarships from both LBS and BITS. I am an avid learner, a great teamplayer, and a focused individual. Coming from a Computer Science background, I can comfortably code in multiple programming languages:</description>
+    </item>
+    
     <item>
       <title>Aliquam</title>
       <link>/blogs/aliquam/</link>
