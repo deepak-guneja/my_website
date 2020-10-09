@@ -83,7 +83,7 @@ disqusShortname = ""
     # the 'static/img' folder.
     title = "Want to know more about Deepak Guneja?"
     subtitle = "Let's start.."
-    # buttonText = "My background"
+     buttonText = "Get Started"
 
 
   # Tiles Section
@@ -95,7 +95,7 @@ disqusShortname = ""
       title = "Biography"
       subtitle = "A little about my background.."
       image = "biography_img_bg.jpg"
-      url = "blogs/project1"
+      url = "blogs/blog6"
 
     [[params.tiles.showcase]]
       title = "Tempus"

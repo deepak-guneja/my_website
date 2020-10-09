@@ -7,7 +7,7 @@ description: My biography
 draft: false
 image: biography_img_bg.jpg
 keywords: ""
-slug: project1
+slug: blog6
 title: My biography
 ---
 
