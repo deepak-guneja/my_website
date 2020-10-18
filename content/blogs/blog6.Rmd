@@ -18,7 +18,7 @@ library(gapminder)  # gapminder dataset
 library(here)
 ```
 
-![](../blogs/biography_img_bg.jpg)
+![](../biography_img_bg.jpg){width=50% height=50%}
 
 ### Biography
 
