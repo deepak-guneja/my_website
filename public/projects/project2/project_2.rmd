@@ -1,0 +1,178 @@
+---
+categories:
+- ""
+- ""
+date: "2020-10-09"
+description: Gapminder
+draft: false
+image: project2/gdp.jpg
+keywords: ""
+slug: project_2
+title: Let's use use Gapminder data to find interesting facts..
+---
+
+
+```{r load-libraries, include=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
+library(mosaic)
+library(ggthemes)
+library(lubridate)
+library(here)
+library(skimr)
+library(janitor)
+library(httr)
+library(readxl)
+library(vroom)
+library(infer)
+library(ggplot2)
+library(ggrepel)
+```
+
+# Gapminder revisited
+
+```{r, get_data, cache=TRUE, warning=FALSE, message=FALSE}
+# load gapminder HIV data
+adults_with_hiv_percent_age_15_49 <- read_csv(here::here("data","adults_with_hiv_percent_age_15_49.csv"))
+life_expectancy_years <- read_csv(here::here("data","life_expectancy_years.csv"))
+
+# get World bank data using wbstats
+indicators <- c("SP.DYN.TFRT.IN","SE.PRM.NENR", "SH.DYN.MORT", "NY.GDP.PCAP.KD")
+
+
+library(wbstats)
+
+worldbank_data <- wb_data(country="countries_only", #countries only- no aggregates like Latin America, Europe, etc.
+                          indicator = indicators, 
+                          start_date = 1960, 
+                          end_date = 2016)
+
+# get a dataframe of information regarding countries, indicators, sources, regions, indicator topics, lending types, income levels,  from the World Bank API 
+countries <-  wbstats::wb_cachelist$countries
+
+```
+
+
+1. Relationship between HIV prevalence and life expectancy.
+
+```{r, relationship_between_HIV_and_Life_Expectancy, warning=FALSE, message=FALSE}
+Mutatation_life_expectancy <- life_expectancy_years%>%
+  select(country,"1979":"2011")%>%
+  pivot_longer(cols="1979":"2011",
+               names_to="year",
+               values_to="life_expectancy")
+
+Mutation_HIV_prevalence <- adults_with_hiv_percent_age_15_49%>%
+  select(country,"1979":"2011")%>%
+  pivot_longer(cols="1979":"2011",
+               names_to="year",
+               values_to="HIV_prevalence")
+
+Combined_data<-inner_join(Mutatation_life_expectancy,Mutation_HIV_prevalence,by=c("country","year"))
+Combined_data<-inner_join(countries,Combined_data,by="country")
+
+ggplot(Combined_data, aes(y=life_expectancy,x=HIV_prevalence))+
+    geom_smooth(colour="red")+
+           geom_point(alpha = 0.4, size=0.4)+
+           facet_wrap(~region, scales="free")+
+    labs(title="Relationship between HIV prevalence and life expectancy",y="Life expectancy",x="HIV prevalence") +
+  theme_solarized()
+
+```
+
+Needed to have years as a column because earlier column headers were values not variable names.
+
+2. Relationship between fertility rate and GDP per capita.
+
+```{r, relationship_between_fertility_rate_and_GDP_per_capita, warning=FALSE, message=FALSE}
+
+Combined_data_2 <- inner_join(countries,worldbank_data,by="country")
+
+ggplot(Combined_data_2, aes(x=NY.GDP.PCAP.KD,y=SP.DYN.TFRT.IN))+
+    geom_smooth(colour="red")+
+           geom_point(alpha=0.4, size=0.4)+
+           facet_wrap(~region, scales = "free")+
+    labs(title="Relationship between Fertility rate and GDP per capita",x="GDP per capita",y="Fertility rate") +
+  theme_solarized()
+
+```
+
+
+3. Regions with most observations of missing HIV data.
+
+```{r, missing_HIV_data, warning=FALSE, message=FALSE}
+
+Combined_data_3 <- Combined_data %>%
+    filter(is.na(HIV_prevalence)) %>%
+    group_by(region) %>%
+    summarise(count=count(region))
+    ggplot(Combined_data_3,aes(x=count,y=reorder(region,count)))+
+    geom_col()+
+    geom_text_repel(aes(label = count)) +
+    theme_economist()+
+    labs(title="Number of missing HIV data",x="HIV Missing Data",y="Region")
+
+  
+```
+
+4. Top 5 countries that have seen the greatest improvement in mortality rates, as well as those 5 countries where mortality rates have had the least improvement or even deterioration.
+
+```{r, mortality_rate, fig.width=12, warning=FALSE, message=FALSE}
+
+cleaned_data_latest <- Combined_data_2 %>% filter(!is.na(SH.DYN.MORT)) %>% group_by(region, country) %>% 
+  top_n(n=1, wt=date) %>% select(region, country, SH.DYN.MORT, date)
+
+cleaned_data_oldest <- Combined_data_2 %>% filter(!is.na(SH.DYN.MORT)) %>% group_by(region, country) %>% 
+  top_n(n=1, wt=-date) %>% select(region, country, SH.DYN.MORT, date)
+
+improvement_data <- cleaned_data_latest %>% inner_join(cleaned_data_oldest,
+                                                       by=c("region", "country"),
+                                                       suffix = c("_latest", "_oldest")) %>% 
+  mutate(improvement = -((SH.DYN.MORT_latest - SH.DYN.MORT_oldest)/SH.DYN.MORT_oldest)*100.0) #negative sign because reduction in mortality is actually improvement in mortality
+improvement_data
+
+
+top_5_improvements_by_region <- improvement_data %>% group_by(region) %>% top_n(n=5, wt=improvement) %>% arrange(region, -improvement)
+top_5_improvements_by_region
+
+ggplot(top_5_improvements_by_region, aes(x=improvement, y=reorder(country, improvement))) +
+  geom_col() +
+  xlim(0, 100) +
+  facet_wrap(~region, scales = "free") +
+  labs(title="Top 5 countries with highest improvement in mortality rates",
+       subtitle="improvement is calculated by -(latest mortality rate - oldest mortality rate)/oldest mortality rate * 100",
+       x = "Improvement Percent",
+       y = "Country") + 
+  geom_text(aes(label = improvement %>% round(2))) +
+  theme_bw()
+
+bottom_5_improvements_by_region <- improvement_data %>% group_by(region) %>% top_n(n=5, wt=-improvement) %>% arrange(region, improvement)
+bottom_5_improvements_by_region
+
+ggplot(bottom_5_improvements_by_region, aes(x=improvement, y=reorder(country, -improvement))) +
+  geom_col() +
+  xlim(0, 100) +
+  facet_wrap(~region, scales = "free") +
+  labs(title="Bottom 5 countries with lowest improvement in mortality rates",
+       subtitle="improvement is calculated by -(latest mortality rate - oldest mortality rate)/oldest mortality rate * 100",
+       x = "Improvement Percent",
+       y = "Country") + 
+  geom_text(aes(label = improvement %>% round(2))) +
+  theme_bw()
+  
+```
+
+5. Relationship between primary school enrollment and fertility rate.
+
+```{r, primary_school_enrollment_and_fertility_rate, warning=FALSE, message=FALSE}
+
+ggplot(Combined_data_2, aes(x=SE.PRM.NENR,y=SP.DYN.TFRT.IN))+
+    geom_smooth(colour="red")+
+           geom_point()+
+    labs(title="Relationship between Fertility rate and Primary school enrollment",x="Primary school enrollment",y="Fertility rate")
+
+ggplot(Combined_data_2, aes(x=SE.PRM.NENR,y=SP.DYN.TFRT.IN))+
+    geom_smooth(colour="red")+
+           geom_point(alpha=0.4, size=0.4)+
+           facet_wrap(~region, scales="free")+
+    labs(title="Relationship between Fertility rate and Primary school enrollment by region",x="Primary school enrollment",y="Fertility rate")
+```

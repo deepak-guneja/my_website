@@ -1,0 +1,185 @@
+---
+categories:
+- ""
+- ""
+date: "2020-10-09"
+description: Gapminder
+draft: false
+image: project2/gdp.jpg
+keywords: ""
+slug: project_2
+title: Let's use use Gapminder data to find interesting facts..
+---
+
+
+
+<div id="gapminder-revisited" class="section level1">
+<h1>Gapminder revisited</h1>
+<pre class="r"><code># load gapminder HIV data
+adults_with_hiv_percent_age_15_49 &lt;- read_csv(here::here(&quot;data&quot;,&quot;adults_with_hiv_percent_age_15_49.csv&quot;))
+life_expectancy_years &lt;- read_csv(here::here(&quot;data&quot;,&quot;life_expectancy_years.csv&quot;))
+
+# get World bank data using wbstats
+indicators &lt;- c(&quot;SP.DYN.TFRT.IN&quot;,&quot;SE.PRM.NENR&quot;, &quot;SH.DYN.MORT&quot;, &quot;NY.GDP.PCAP.KD&quot;)
+
+
+library(wbstats)
+
+worldbank_data &lt;- wb_data(country=&quot;countries_only&quot;, #countries only- no aggregates like Latin America, Europe, etc.
+                          indicator = indicators, 
+                          start_date = 1960, 
+                          end_date = 2016)
+
+# get a dataframe of information regarding countries, indicators, sources, regions, indicator topics, lending types, income levels,  from the World Bank API 
+countries &lt;-  wbstats::wb_cachelist$countries</code></pre>
+<ol style="list-style-type: decimal">
+<li>Relationship between HIV prevalence and life expectancy.</li>
+</ol>
+<pre class="r"><code>Mutatation_life_expectancy &lt;- life_expectancy_years%&gt;%
+  select(country,&quot;1979&quot;:&quot;2011&quot;)%&gt;%
+  pivot_longer(cols=&quot;1979&quot;:&quot;2011&quot;,
+               names_to=&quot;year&quot;,
+               values_to=&quot;life_expectancy&quot;)
+
+Mutation_HIV_prevalence &lt;- adults_with_hiv_percent_age_15_49%&gt;%
+  select(country,&quot;1979&quot;:&quot;2011&quot;)%&gt;%
+  pivot_longer(cols=&quot;1979&quot;:&quot;2011&quot;,
+               names_to=&quot;year&quot;,
+               values_to=&quot;HIV_prevalence&quot;)
+
+Combined_data&lt;-inner_join(Mutatation_life_expectancy,Mutation_HIV_prevalence,by=c(&quot;country&quot;,&quot;year&quot;))
+Combined_data&lt;-inner_join(countries,Combined_data,by=&quot;country&quot;)
+
+ggplot(Combined_data, aes(y=life_expectancy,x=HIV_prevalence))+
+    geom_smooth(colour=&quot;red&quot;)+
+           geom_point(alpha = 0.4, size=0.4)+
+           facet_wrap(~region, scales=&quot;free&quot;)+
+    labs(title=&quot;Relationship between HIV prevalence and life expectancy&quot;,y=&quot;Life expectancy&quot;,x=&quot;HIV prevalence&quot;) +
+  theme_solarized()</code></pre>
+<p><img src="/projects/project2/project_2_files/figure-html/relationship_between_HIV_and_Life_Expectancy-1.png" width="672" /></p>
+<p>Needed to have years as a column because earlier column headers were values not variable names.</p>
+<ol start="2" style="list-style-type: decimal">
+<li>Relationship between fertility rate and GDP per capita.</li>
+</ol>
+<pre class="r"><code>Combined_data_2 &lt;- inner_join(countries,worldbank_data,by=&quot;country&quot;)
+
+ggplot(Combined_data_2, aes(x=NY.GDP.PCAP.KD,y=SP.DYN.TFRT.IN))+
+    geom_smooth(colour=&quot;red&quot;)+
+           geom_point(alpha=0.4, size=0.4)+
+           facet_wrap(~region, scales = &quot;free&quot;)+
+    labs(title=&quot;Relationship between Fertility rate and GDP per capita&quot;,x=&quot;GDP per capita&quot;,y=&quot;Fertility rate&quot;) +
+  theme_solarized()</code></pre>
+<p><img src="/projects/project2/project_2_files/figure-html/relationship_between_fertility_rate_and_GDP_per_capita-1.png" width="672" /></p>
+<ol start="3" style="list-style-type: decimal">
+<li>Regions with most observations of missing HIV data.</li>
+</ol>
+<pre class="r"><code>Combined_data_3 &lt;- Combined_data %&gt;%
+    filter(is.na(HIV_prevalence)) %&gt;%
+    group_by(region) %&gt;%
+    summarise(count=count(region))
+    ggplot(Combined_data_3,aes(x=count,y=reorder(region,count)))+
+    geom_col()+
+    geom_text_repel(aes(label = count)) +
+    theme_economist()+
+    labs(title=&quot;Number of missing HIV data&quot;,x=&quot;HIV Missing Data&quot;,y=&quot;Region&quot;)</code></pre>
+<p><img src="/projects/project2/project_2_files/figure-html/missing_HIV_data-1.png" width="672" /></p>
+<ol start="4" style="list-style-type: decimal">
+<li>Top 5 countries that have seen the greatest improvement in mortality rates, as well as those 5 countries where mortality rates have had the least improvement or even deterioration.</li>
+</ol>
+<pre class="r"><code>cleaned_data_latest &lt;- Combined_data_2 %&gt;% filter(!is.na(SH.DYN.MORT)) %&gt;% group_by(region, country) %&gt;% 
+  top_n(n=1, wt=date) %&gt;% select(region, country, SH.DYN.MORT, date)
+
+cleaned_data_oldest &lt;- Combined_data_2 %&gt;% filter(!is.na(SH.DYN.MORT)) %&gt;% group_by(region, country) %&gt;% 
+  top_n(n=1, wt=-date) %&gt;% select(region, country, SH.DYN.MORT, date)
+
+improvement_data &lt;- cleaned_data_latest %&gt;% inner_join(cleaned_data_oldest,
+                                                       by=c(&quot;region&quot;, &quot;country&quot;),
+                                                       suffix = c(&quot;_latest&quot;, &quot;_oldest&quot;)) %&gt;% 
+  mutate(improvement = -((SH.DYN.MORT_latest - SH.DYN.MORT_oldest)/SH.DYN.MORT_oldest)*100.0) #negative sign because reduction in mortality is actually improvement in mortality
+improvement_data</code></pre>
+<pre><code>## # A tibble: 193 x 7
+## # Groups:   region, country [193]
+##    region country SH.DYN.MORT_lat~ date_latest SH.DYN.MORT_old~ date_oldest
+##    &lt;chr&gt;  &lt;chr&gt;              &lt;dbl&gt;       &lt;dbl&gt;            &lt;dbl&gt;       &lt;dbl&gt;
+##  1 South~ Afghan~             67.6        2016            345.         1962
+##  2 Sub-S~ Angola              84.2        2016            237.         1980
+##  3 Europ~ Albania              9.4        2016             96.2        1978
+##  4 Europ~ Andorra              3.4        2016             17.1        1985
+##  5 Middl~ United~              7.8        2016            200.         1960
+##  6 Latin~ Argent~             10.9        2016             72.5        1969
+##  7 Europ~ Armenia             13.7        2016             86.2        1976
+##  8 Latin~ Antigu~              7.4        2016             86.2        1960
+##  9 East ~ Austra~              3.8        2016             24.8        1960
+## 10 Europ~ Austria              3.6        2016             42.8        1960
+## # ... with 183 more rows, and 1 more variable: improvement &lt;dbl&gt;</code></pre>
+<pre class="r"><code>top_5_improvements_by_region &lt;- improvement_data %&gt;% group_by(region) %&gt;% top_n(n=5, wt=improvement) %&gt;% arrange(region, -improvement)
+top_5_improvements_by_region</code></pre>
+<pre><code>## # A tibble: 32 x 7
+## # Groups:   region [7]
+##    region country SH.DYN.MORT_lat~ date_latest SH.DYN.MORT_old~ date_oldest
+##    &lt;chr&gt;  &lt;chr&gt;              &lt;dbl&gt;       &lt;dbl&gt;            &lt;dbl&gt;       &lt;dbl&gt;
+##  1 East ~ Korea,~              3.4        2016            112.         1960
+##  2 East ~ Singap~              2.7        2016             47.7        1960
+##  3 East ~ Japan                2.7        2016             39.7        1960
+##  4 East ~ Thaila~             10.3        2016            146.         1960
+##  5 East ~ China                9.9        2016            118.         1969
+##  6 Europ~ Portug~              3.6        2016            114.         1960
+##  7 Europ~ Turkey              12.1        2016            257.         1960
+##  8 Europ~ Italy                3.4        2016             51.9        1960
+##  9 Europ~ Cyprus               2.6        2016             38.2        1971
+## 10 Europ~ Poland               4.7        2016             65.1        1960
+## # ... with 22 more rows, and 1 more variable: improvement &lt;dbl&gt;</code></pre>
+<pre class="r"><code>ggplot(top_5_improvements_by_region, aes(x=improvement, y=reorder(country, improvement))) +
+  geom_col() +
+  xlim(0, 100) +
+  facet_wrap(~region, scales = &quot;free&quot;) +
+  labs(title=&quot;Top 5 countries with highest improvement in mortality rates&quot;,
+       subtitle=&quot;improvement is calculated by -(latest mortality rate - oldest mortality rate)/oldest mortality rate * 100&quot;,
+       x = &quot;Improvement Percent&quot;,
+       y = &quot;Country&quot;) + 
+  geom_text(aes(label = improvement %&gt;% round(2))) +
+  theme_bw()</code></pre>
+<p><img src="/projects/project2/project_2_files/figure-html/mortality_rate-1.png" width="1152" /></p>
+<pre class="r"><code>bottom_5_improvements_by_region &lt;- improvement_data %&gt;% group_by(region) %&gt;% top_n(n=5, wt=-improvement) %&gt;% arrange(region, improvement)
+bottom_5_improvements_by_region</code></pre>
+<pre><code>## # A tibble: 32 x 7
+## # Groups:   region [7]
+##    region country SH.DYN.MORT_lat~ date_latest SH.DYN.MORT_old~ date_oldest
+##    &lt;chr&gt;  &lt;chr&gt;              &lt;dbl&gt;       &lt;dbl&gt;            &lt;dbl&gt;       &lt;dbl&gt;
+##  1 East ~ Micron~             32.5        2016             56.5        1981
+##  2 East ~ Korea,~             20          2016             35.1        1985
+##  3 East ~ Palau               19.1        2016             36.4        1985
+##  4 East ~ Nauru               33.9        2016             74.1        1985
+##  5 East ~ Tuvalu              26.4        2016             80.5        1975
+##  6 Europ~ Monaco               3.4        2016              9.7        1985
+##  7 Europ~ Turkme~             42.2        2016            133.         1977
+##  8 Europ~ Slovak~              6.1        2016             21.6        1981
+##  9 Europ~ Ukraine              9.2        2016             33.8        1971
+## 10 Europ~ Moldova             15.3        2016             64.1        1971
+## # ... with 22 more rows, and 1 more variable: improvement &lt;dbl&gt;</code></pre>
+<pre class="r"><code>ggplot(bottom_5_improvements_by_region, aes(x=improvement, y=reorder(country, -improvement))) +
+  geom_col() +
+  xlim(0, 100) +
+  facet_wrap(~region, scales = &quot;free&quot;) +
+  labs(title=&quot;Bottom 5 countries with lowest improvement in mortality rates&quot;,
+       subtitle=&quot;improvement is calculated by -(latest mortality rate - oldest mortality rate)/oldest mortality rate * 100&quot;,
+       x = &quot;Improvement Percent&quot;,
+       y = &quot;Country&quot;) + 
+  geom_text(aes(label = improvement %&gt;% round(2))) +
+  theme_bw()</code></pre>
+<p><img src="/projects/project2/project_2_files/figure-html/mortality_rate-2.png" width="1152" /></p>
+<ol start="5" style="list-style-type: decimal">
+<li>Relationship between primary school enrollment and fertility rate.</li>
+</ol>
+<pre class="r"><code>ggplot(Combined_data_2, aes(x=SE.PRM.NENR,y=SP.DYN.TFRT.IN))+
+    geom_smooth(colour=&quot;red&quot;)+
+           geom_point()+
+    labs(title=&quot;Relationship between Fertility rate and Primary school enrollment&quot;,x=&quot;Primary school enrollment&quot;,y=&quot;Fertility rate&quot;)</code></pre>
+<p><img src="/projects/project2/project_2_files/figure-html/primary_school_enrollment_and_fertility_rate-1.png" width="672" /></p>
+<pre class="r"><code>ggplot(Combined_data_2, aes(x=SE.PRM.NENR,y=SP.DYN.TFRT.IN))+
+    geom_smooth(colour=&quot;red&quot;)+
+           geom_point(alpha=0.4, size=0.4)+
+           facet_wrap(~region, scales=&quot;free&quot;)+
+    labs(title=&quot;Relationship between Fertility rate and Primary school enrollment by region&quot;,x=&quot;Primary school enrollment&quot;,y=&quot;Fertility rate&quot;)</code></pre>
+<p><img src="/projects/project2/project_2_files/figure-html/primary_school_enrollment_and_fertility_rate-2.png" width="672" /></p>
+</div>

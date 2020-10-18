@@ -8,6 +8,45 @@
     <language>en-us</language>
     <lastBuildDate>Fri, 09 Oct 2020 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     <item>
+      <title>Let&#39;s see the trend youth is following!</title>
+      <link>/projects/project4/project_4/</link>
+      <pubDate>Fri, 09 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/projects/project4/project_4/</guid>
+      <description>Youth Risk Behavior SurveillanceEvery two years, the Centers for Disease Control and Prevention conduct the Youth Risk Behavior Surveillance System (YRBSS) survey, where it takes data from high schoolers (9th through 12th grade), to analyze health patterns. We selected group of variables from a random sample of observations during one of the years the YRBSS was conducted.
+Load the datadata(yrbss)glimpse(yrbss)## Rows: 13,583## Columns: 13## $ age &amp;lt;int&amp;gt; 14, 14, 15, 15, 15, 15, 15, 14, 15, 15, 15.</description>
+    </item>
+    
+    <item>
+      <title>Let&#39;s study Yield Curves if they can predict Recessions!</title>
+      <link>/projects/project3/project_3/</link>
+      <pubDate>Fri, 09 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/projects/project3/project_3/</guid>
+      <description>Yield Curve inversionIn our case we will look at US data and use the FRED database to download historical yield curve rates, and plot the yield curves since 1999 to see when the yield curves flatten.
+First, we will use the tidyquant package to download monthly rates for different durations.
+# Get a list of FRED codes for US rates and US yield curve; choose monthly frequency# to see, eg.</description>
+    </item>
+    
+    <item>
+      <title>Let&#39;s use use Gapminder data to find interesting facts..</title>
+      <link>/projects/project2/project_2/</link>
+      <pubDate>Fri, 09 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/projects/project2/project_2/</guid>
+      <description>Gapminder revisited# load gapminder HIV dataadults_with_hiv_percent_age_15_49 &amp;lt;- read_csv(here::here(&amp;quot;data&amp;quot;,&amp;quot;adults_with_hiv_percent_age_15_49.csv&amp;quot;))life_expectancy_years &amp;lt;- read_csv(here::here(&amp;quot;data&amp;quot;,&amp;quot;life_expectancy_years.csv&amp;quot;))# get World bank data using wbstatsindicators &amp;lt;- c(&amp;quot;SP.DYN.TFRT.IN&amp;quot;,&amp;quot;SE.PRM.NENR&amp;quot;, &amp;quot;SH.DYN.MORT&amp;quot;, &amp;quot;NY.GDP.PCAP.KD&amp;quot;)library(wbstats)worldbank_data &amp;lt;- wb_data(country=&amp;quot;countries_only&amp;quot;, #countries only- no aggregates like Latin America, Europe, etc.indicator = indicators, start_date = 1960, end_date = 2016)# get a dataframe of information regarding countries, indicators, sources, regions, indicator topics, lending types, income levels, from the World Bank API countries &amp;lt;- wbstats::wb_cachelist$countriesRelationship between HIV prevalence and life expectancy.</description>
+    </item>
+    
+    <item>
+      <title>Movie buff?? You&#39;ll find this interesting!</title>
+      <link>/projects/project1/project_1/</link>
+      <pubDate>Fri, 09 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/projects/project1/project_1/</guid>
+      <description>Analysis of movies- IMDB datasetmovies &amp;lt;- read_csv(here::here(&amp;quot;data&amp;quot;, &amp;quot;movies.csv&amp;quot;))glimpse(movies)## Rows: 2,961## Columns: 11## $ title &amp;lt;chr&amp;gt; &amp;quot;Avatar&amp;quot;, &amp;quot;Titanic&amp;quot;, &amp;quot;Jurassic World&amp;quot;, &amp;quot;The Ave...## $ genre &amp;lt;chr&amp;gt; &amp;quot;Action&amp;quot;, &amp;quot;Drama&amp;quot;, &amp;quot;Action&amp;quot;, &amp;quot;Action&amp;quot;, &amp;quot;Action&amp;quot;...## $ director &amp;lt;chr&amp;gt; &amp;quot;James Cameron&amp;quot;, &amp;quot;James Cameron&amp;quot;, &amp;quot;Colin Trevor...## $ year &amp;lt;dbl&amp;gt; 2009, 1997, 2015, 2012, 2008, 1999, 1977, 2015,...## $ duration &amp;lt;dbl&amp;gt; 178, 194, 124, 173, 152, 136, 125, 141, 164, 93.</description>
+    </item>
+    
+    <item>
       <title>My biography</title>
       <link>/blogs/blog6/</link>
       <pubDate>Fri, 09 Oct 2020 00:00:00 +0000</pubDate>
