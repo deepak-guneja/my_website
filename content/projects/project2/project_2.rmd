@@ -8,7 +8,7 @@ draft: false
 image: project2/gdp.jpg
 keywords: ""
 slug: project_2
-title: Let's use use Gapminder data to find interesting facts..
+title: Let's use Gapminder data to find interesting facts..
 ---
 
 
@@ -28,7 +28,7 @@ library(ggplot2)
 library(ggrepel)
 ```
 
-# Gapminder revisited
+# Gapminder
 
 ```{r, get_data, cache=TRUE, warning=FALSE, message=FALSE}
 # load gapminder HIV data
