@@ -28,7 +28,7 @@ library(ggplot2)
 library(ggrepel)
 ```
 
-# Gapminder
+# Let's analyse Gapminder
 
 ```{r, get_data, cache=TRUE, warning=FALSE, message=FALSE}
 # load gapminder HIV data
