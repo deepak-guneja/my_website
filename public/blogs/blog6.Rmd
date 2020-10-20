@@ -18,7 +18,7 @@ library(gapminder)  # gapminder dataset
 library(here)
 ```
 
-![](../biography_img_bg.jpg){width=25% height=25%}
+<center> ![](../biography_img_bg.jpg){width=25% height=25%} </center>
 
 ### Biography
 
@@ -32,7 +32,7 @@ My name is Deepak Guneja, and I am reading **Masters in Financial Analysis** deg
 
 I have a strong interest in Mathematics, Finance, and Computer Science, therefore I am looking forward to pursue a role in Quantitative Finance industry, especially in the Hedge-funds. I have interned with Indian Space Research Organization, Morgan Stanley, and D. E. Shaw, and come with a 1-year full-time work experience in D. E. Shaw. In my free time, if I am not reading articles or watching videos on Psychology, Mathematics, or Finance, you can find me watching mysterious/thriller movies, Interstellar being my favorite. If you would like to know more about me, you can reach out to me on [e-mail id](mailto:dguneja.mfa2021@london.edu) or [LinkedIn](https://www.linkedin.com/in/deepak-guneja/).
 
-![Here is my CV](../DeepakGuneja-CV.pdf){width=100% height=1000}
+<center> ![Here is my CV](../DeepakGuneja-CV.jpg){width=66.7% height=100%} </center>
 
 
 
